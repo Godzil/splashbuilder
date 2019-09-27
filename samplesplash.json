@@ -1,0 +1,85 @@
+{
+  "splash_size": 1,
+  "animation": {
+    "startTime": 32,
+    "endTime": 244
+  },
+  "sprite":
+  {
+    "count": 24
+  },
+  "consoleName": {
+    "vertical": {
+      "x_pos": 68,
+      "y_pos": 80
+    },
+    "horizontal": {
+      "x_pos": 96,
+      "y_pos": 108
+    },
+  "color": 0
+  },
+  "palette": [
+    [0, 0, 0],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [0, 0, 0],
+    [16, 16, 16],
+    [16, 16, 16],
+    [0, 0, 0],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [16, 16, 16],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [0, 0, 0],
+    [16, 16, 16],
+    [0, 0, 0],
+    [16, 16, 16],
+    [0, 0, 0],
+    [16, 16, 16],
+    [0, 0, 0],
+    [16, 16, 16],
+    [16, 16, 16]
+  ],
+  "tiles": {
+    "bpp": 1,
+    "count": 12,
+    "data": "samplesplash_tiles.bin"
+  },
+  "tilemap": {
+    "vertical": {
+      "top": 6,
+      "left": 18
+    },
+    "horizontal": {
+      "top": 4,
+      "left": 11
+    },
+    "height": 6,
+    "width": 6,
+    "data": "samplesplash_tilemap.bin"
+  },
+  "vblankCode": {
+    "asm": "samplesplasg_vblank.asm"
+  },
+  "sound": {
+    "channelwaves": "samplesplash_waves.bin",
+    "channeldata": {
+      "ch0": "wonderwhat_ch0.bin",
+      "ch1": "wonderwhat_ch1.bin",
+      "ch2": ""
+    }
+  }
+}
