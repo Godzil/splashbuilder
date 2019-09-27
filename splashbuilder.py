@@ -62,4 +62,14 @@ struct bootsplash_t
    uint16_t soundChannelDataOffset[3]
 };
 
+Sounds seems to be
+
+uint32_t
+
+duration (8 bit) (in vblank)
+Volume (8bit)
+Pitch (16bit)
+
+if pitch bit 7 is set then the channel is stopped.
+
 """

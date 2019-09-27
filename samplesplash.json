@@ -56,7 +56,7 @@
   "tiles": {
     "bpp": 1,
     "count": 12,
-    "data": "samplesplash_tiles.bin"
+    "binfile": "samplesplash_tiles.bin"
   },
   "tilemap": {
     "vertical": {
@@ -69,7 +69,7 @@
     },
     "height": 6,
     "width": 6,
-    "data": "samplesplash_tilemap.bin"
+    "binfile": "samplesplash_tilemap.bin"
   },
   "vblankCode": {
     "asm": "samplesplasg_vblank.asm"
@@ -79,7 +79,8 @@
     "channeldata": {
       "ch0": "wonderwhat_ch0.bin",
       "ch1": "wonderwhat_ch1.bin",
-      "ch2": ""
+      "ch2": "",
+      "ch3": ""
     }
   }
 }
