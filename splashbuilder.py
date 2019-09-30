@@ -73,3 +73,13 @@ Pitch (16bit)
 if pitch bit 7 is set then the channel is stopped.
 
 """
+
+import json
+import struct
+
+def main():
+    print("Hello")
+
+
+if __name__ == "__main__":
+    main()
