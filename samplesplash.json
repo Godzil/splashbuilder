@@ -6,7 +6,7 @@
   },
   "sprite":
   {
-    "count": 24
+    "count": 0
   },
   "consoleName": {
     "vertical": {
@@ -77,8 +77,8 @@
   "sound": {
     "channelwaves": "samplesplash_waves.bin",
     "channeldata": {
-      "ch0": "wonderwhat_ch0.bin",
-      "ch1": "wonderwhat_ch1.bin",
+      "ch0": "samplesplash_ch0.bin",
+      "ch1": "samplesplash_ch1.bin",
       "ch2": "",
       "ch3": ""
     }
