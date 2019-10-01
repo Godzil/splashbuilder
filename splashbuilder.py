@@ -76,9 +76,103 @@ if pitch bit 7 is set then the channel is stopped.
 
 import json
 import struct
+import argparse
+
+
+class Coordinates(object):
+    def __init__(self, config):
+        self.x = config["top"]
+        self.y = config["left"]
+
+
+class Animation(object):
+    def __init__(self, config):
+        self.start = config["startTime"]
+        self.end = config["endTime"]
+
+
+class ConsoleName(object):
+    def __init__(self, config):
+        self.vertical = Coordinates(config["vertical"])
+        self.horizontal = Coordinates(config["horizontal"])
+        self.color = config["color"]
+
+
+class Tiles(object):
+    def __init__(self, config):
+        self.bpp = config["bpp"]
+        self.count = config["count"]
+        self.binfile = config["binfile"]
+        self.data = open(self.binfile, "rb").read()
+
+
+class Tilemap(object):
+    def __init__(self, config):
+        self.vertical = Coordinates(config["vertical"])
+        self.horizontal = Coordinates(config["horizontal"])
+        self.height = config["height"]
+        self.width = config["width"]
+        self.binfile = config["binfile"]
+        self.data = open(self.binfile, "rb").read()
+
+
+class VBlankCode(object):
+    def __init__(self, config):
+        self.asmfile = config["asm"]
+        runcmd = "nasm -f bin -o {output} {input}"
+
+
+class Sound(object):
+    def __init__(self, config):
+        self.channelwaves = config["channelwaves"]
+        self.waves = open(self.channelwaves, "rb").read()
+        self.channeldata = config["channeldata"]
+        self.chdata = {}
+        self.chdata[0] = None
+        self.chdata[1] = None
+        self.chdata[2] = None
+        self.chdata[3] = None
+
+        if self.channeldata["ch0"] is not "":
+            self.chdata[0] = open(self.channeldata["ch0"], "rb").read()
+        if self.channeldata["ch1"] is not "":
+            self.chdata[1] = open(self.channeldata["ch1"], "rb").read()
+        if self.channeldata["ch2"] is not "":
+            self.chdata[2] = open(self.channeldata["ch2"], "rb").read()
+        if self.channeldata["ch3"] is not "":
+            self.chdata[3] = open(self.channeldata["ch3"], "rb").read()
+
+
+class BootSplash(object):
+    def __init__(self, config_json):
+        self._spriteCount = config_json["sprite"]["count"]
+        self._animation = Animation(config_json["animation"])
+        self._consoleName = ConsoleName(config_json["consoleName"])
+        self._palettes = config_json["palette"]
+        self._tiles = Tiles(config_json["tiles"])
+        self._tilemap = Tilemap(config_json["tilemap"])
+        self._vblankcode = VBlankCode(config_json["vblankCode"])
+        self._sound = Sound(config_json["sound"])
+
+    def write(self, filename):
+        print(self)
+
 
 def main():
-    print("Hello")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", required=True, type=str, help="Configuration file")
+    parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")
+    args = parser.parse_args()
+
+    try:
+        with open(args.config, "rt") as f:
+            config = json.load(f)
+    except IOError:
+        print("Error: config file '{f}' not found".format(f=args.config))
+        return -1
+
+    bs = BootSplash(config)
+    bs.write(args.output)
 
 
 if __name__ == "__main__":
