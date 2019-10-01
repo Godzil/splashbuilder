@@ -10,12 +10,12 @@
   },
   "consoleName": {
     "vertical": {
-      "x_pos": 68,
-      "y_pos": 80
+      "top": 68,
+      "left": 80
     },
     "horizontal": {
-      "x_pos": 96,
-      "y_pos": 108
+      "top": 96,
+      "left": 108
     },
   "color": 0
   },
