@@ -73,7 +73,7 @@ Pitch (16bit)
 if pitch bit 7 is set then the channel is stopped.
 
 """
-
+import os
 import json
 import struct
 import argparse
@@ -102,9 +102,14 @@ class Tiles(object):
     def __init__(self, config):
         self.bpp = config["bpp"]
         self.count = config["count"]
-        self.binfile = config["binfile"]
+        self.binfile = os.path.abspath(config["binfile"])
         self.data = open(self.binfile, "rb").read()
 
+    def get_size(self):
+        return len(self.data)
+
+    def write(self, f):
+        f.write(self.data)
 
 class Tilemap(object):
     def __init__(self, config):
@@ -112,14 +117,36 @@ class Tilemap(object):
         self.horizontal = Coordinates(config["horizontal"])
         self.height = config["height"]
         self.width = config["width"]
-        self.binfile = config["binfile"]
+        self.binfile = os.path.abspath(config["binfile"])
         self.data = open(self.binfile, "rb").read()
+
+    def get_size(self):
+        return len(self.data)
+
+    def get_horz_offset(self):
+        return 2 * (self.horizontal.x * 32 + self.horizontal.y) + 0x800
+
+    def get_vert_offset(self):
+        return 2 * (self.vertical.x * 32 + self.vertical.y) + 0x800
+
+    def write(self, f):
+        f.write(self.data)
 
 
 class VBlankCode(object):
     def __init__(self, config):
-        self.asmfile = config["asm"]
-        runcmd = "nasm -f bin -o {output} {input}"
+        self.asmfile = os.path.abspath(config["asm"])
+        self.binfile = os.path.splitext(self.asmfile)[0] + ".bin"
+        runcmd = "nasm -f bin -o {output} {input}".format(input=self.asmfile,
+                                                          output=self.binfile)
+        os.system(runcmd)
+        self.data = open(self.binfile, "rb").read()
+
+    def get_size(self):
+        return len(self.data)
+
+    def write(self, f):
+        f.write(self.data)
 
 
 class Sound(object):
@@ -128,6 +155,7 @@ class Sound(object):
         self.waves = open(self.channelwaves, "rb").read()
         self.channeldata = config["channeldata"]
         self.chdata = {}
+
         self.chdata[0] = None
         self.chdata[1] = None
         self.chdata[2] = None
@@ -142,6 +170,14 @@ class Sound(object):
         if self.channeldata["ch3"] is not "":
             self.chdata[3] = open(self.channeldata["ch3"], "rb").read()
 
+    def get_size(self):
+        return len(self.waves)
+               #+ len(self.chdata[0]) + len(self.chdata[1]) + \
+               #len(self.chdata[2]) + len(self.chdata[3]) + 4 * 2
+
+    def write(self, f):
+        f.write(self.waves)
+
 
 class BootSplash(object):
     def __init__(self, config_json):
@@ -154,9 +190,69 @@ class BootSplash(object):
         self._vblankcode = VBlankCode(config_json["vblankCode"])
         self._sound = Sound(config_json["sound"])
 
-    def write(self, filename):
-        print(self)
+        self._paletteSize = len(self._palettes) * 2
+        print("Palette: ", self._paletteSize)
 
+        # Set bootsplash, and volume to 2
+        self._consoleFlags = 0x82
+
+    def palettes_write(self, f):
+        for p in self._palettes:
+            f.write(struct.pack("BB", p[0], (p[1] << 4) | p[2]))
+
+    def write(self, filename):
+        # This is the size of the start structure, used to calculate offset for
+        # all other data
+        offset = 40
+        with open(filename, "wb") as f:
+            f.write(struct.pack("xxx"))
+            f.write(struct.pack("B", self._consoleFlags))
+            f.write(struct.pack("B", self._consoleName.color))
+            f.write(struct.pack("x"))
+            f.write(struct.pack("B", 1))
+            f.write(struct.pack("BB", self._animation.start, self._animation.end))
+            f.write(struct.pack("B", self._spriteCount))
+            f.write(struct.pack("B", 0x00)) # Splash flags
+            f.write(struct.pack("B", self._tiles.count))
+            f.write(struct.pack("<H", offset))  # Palette offset
+            print(offset, self._paletteSize)
+            paletteOffset = offset
+            offset += self._paletteSize
+            f.write(struct.pack("<H", offset))  # Tileset offset
+            print(offset, self._tiles.get_size())
+            tilesetOffset = offset
+            offset += self._tiles.get_size()
+            f.write(struct.pack("<H", offset))  # Tilemap offset
+            print(offset, self._tilemap.get_size())
+            tilemapOffset = offset
+            offset += self._tilemap.get_size()
+            f.write(struct.pack("<H", self._tilemap.get_horz_offset()))
+            f.write(struct.pack("<H", self._tilemap.get_vert_offset()))
+            f.write(struct.pack("B", self._tilemap.width))
+            f.write(struct.pack("B", self._tilemap.height))
+            f.write(struct.pack("<HH", offset, 0x600))
+            print(offset, self._vblankcode.get_size())
+            codeOffset = offset
+            offset += self._vblankcode.get_size()
+            f.write(struct.pack("<BB", self._consoleName.horizontal.x,
+                                       self._consoleName.horizontal.y))
+            f.write(struct.pack("<BB", self._consoleName.vertical.x,
+                                       self._consoleName.vertical.y))
+            f.write(struct.pack("xx"))
+            f.write(struct.pack("<H", offset))
+            print(offset, self._sound.get_size())
+            soundWaveOffset = offset
+            offset += self._sound.get_size()
+            f.write(struct.pack("<H", soundWaveOffset))
+            f.write(struct.pack("<H", soundWaveOffset))
+            f.write(struct.pack("<H", 0xFFFF))
+
+            self.palettes_write(f)
+
+            self._tiles.write(f)
+            self._tilemap.write(f)
+            self._vblankcode.write(f)
+            self._sound.write(f)
 
 def main():
     parser = argparse.ArgumentParser()
