@@ -179,26 +179,35 @@ class Sound(object):
         f.write(self.waves)
 
 
+class Palette(object):
+    def __init__(self, palette):
+        self.palettes = palette["palette"]
+        self.bpp = palette["bpp"]
+        self.flags = (len(self.palettes) // (2 << self.bpp)) & 0x1F
+        if self.bpp == 2:
+            self.flags = self.flags | 0x80
+
+    def get_size(self):
+        return len(self.palettes) * 2
+
+    def write(self, f):
+        for p in self.palettes:
+            f.write(struct.pack("BB", p[0], (p[1] << 4) | p[2]))
+
+
 class BootSplash(object):
     def __init__(self, config_json):
         self._spriteCount = config_json["sprite"]["count"]
         self._animation = Animation(config_json["animation"])
         self._consoleName = ConsoleName(config_json["consoleName"])
-        self._palettes = config_json["palette"]
+        self._palettes = Palette(config_json["palette"])
         self._tiles = Tiles(config_json["tiles"])
         self._tilemap = Tilemap(config_json["tilemap"])
         self._vblankcode = VBlankCode(config_json["vblankCode"])
         self._sound = Sound(config_json["sound"])
 
-        self._paletteSize = len(self._palettes) * 2
-        print("Palette: ", self._paletteSize)
-
         # Set bootsplash, and volume to 2
         self._consoleFlags = 0x82
-
-    def palettes_write(self, f):
-        for p in self._palettes:
-            f.write(struct.pack("BB", p[0], (p[1] << 4) | p[2]))
 
     def write(self, filename):
         # This is the size of the start structure, used to calculate offset for
@@ -212,12 +221,12 @@ class BootSplash(object):
             f.write(struct.pack("B", 1))
             f.write(struct.pack("BB", self._animation.start, self._animation.end))
             f.write(struct.pack("B", self._spriteCount))
-            f.write(struct.pack("B", 0x00)) # Splash flags
+            f.write(struct.pack("B", self._palettes.flags)) # Splash flags
             f.write(struct.pack("B", self._tiles.count))
             f.write(struct.pack("<H", offset))  # Palette offset
-            print(offset, self._paletteSize)
+            print(offset, self._palettes.get_size())
             paletteOffset = offset
-            offset += self._paletteSize
+            offset += self._palettes.get_size()
             f.write(struct.pack("<H", offset))  # Tileset offset
             print(offset, self._tiles.get_size())
             tilesetOffset = offset
@@ -247,7 +256,7 @@ class BootSplash(object):
             f.write(struct.pack("<H", soundWaveOffset))
             f.write(struct.pack("<H", 0xFFFF))
 
-            self.palettes_write(f)
+            self._palettes.write(f)
 
             self._tiles.write(f)
             self._tilemap.write(f)
