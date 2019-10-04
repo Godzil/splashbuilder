@@ -102,8 +102,8 @@ class Tiles(object):
     def __init__(self, config):
         self.bpp = config["bpp"]
         self.count = config["count"]
-        self.binfile = os.path.abspath(config["binfile"])
-        self.data = open(self.binfile, "rb").read()
+        binfile = os.path.abspath(config["binfile"])
+        self.data = open(binfile, "rb").read()
 
     def get_size(self):
         return len(self.data)
@@ -111,14 +111,16 @@ class Tiles(object):
     def write(self, f):
         f.write(self.data)
 
+
 class Tilemap(object):
     def __init__(self, config):
         self.vertical = Coordinates(config["vertical"])
         self.horizontal = Coordinates(config["horizontal"])
         self.height = config["height"]
         self.width = config["width"]
-        self.binfile = os.path.abspath(config["binfile"])
-        self.data = open(self.binfile, "rb").read()
+
+        binfile = os.path.abspath(config["binfile"])
+        self.data = open(binfile, "rb").read()
 
     def get_size(self):
         return len(self.data)
@@ -135,12 +137,18 @@ class Tilemap(object):
 
 class VBlankCode(object):
     def __init__(self, config):
-        self.asmfile = os.path.abspath(config["asm"])
-        self.binfile = os.path.splitext(self.asmfile)[0] + ".bin"
-        runcmd = "nasm -f bin -o {output} {input}".format(input=self.asmfile,
-                                                          output=self.binfile)
-        os.system(runcmd)
-        self.data = open(self.binfile, "rb").read()
+        if "asm" in config:
+            asmfile = os.path.abspath(config["asm"])
+            binfile = os.path.splitext(asmfile)[0] + ".bin"
+            runcmd = "nasm -f bin -o {output} {input}".format(input=asmfile,
+                                                              output=binfile)
+            os.system(runcmd)
+            self.data = open(binfile, "rb").read()
+        elif "binfile" in config:
+            binfile = os.path.abspath(config["binfile"])
+            self.data = open(binfile, "rb").read()
+        else:
+            self.data = b"cb"
 
     def get_size(self):
         return len(self.data)
@@ -151,9 +159,10 @@ class VBlankCode(object):
 
 class Sound(object):
     def __init__(self, config):
-        self.channelwaves = config["channelwaves"]
-        self.waves = open(self.channelwaves, "rb").read()
-        self.channeldata = config["channeldata"]
+        binfile = os.path.abspath(config["waves"])
+        self.waves = open(binfile, "rb").read()
+
+        channeldata = config["channelbin"]
         self.chdata = {}
 
         self.chdata[0] = None
@@ -161,14 +170,15 @@ class Sound(object):
         self.chdata[2] = None
         self.chdata[3] = None
 
-        if self.channeldata["ch0"] is not "":
-            self.chdata[0] = open(self.channeldata["ch0"], "rb").read()
-        if self.channeldata["ch1"] is not "":
-            self.chdata[1] = open(self.channeldata["ch1"], "rb").read()
-        if self.channeldata["ch2"] is not "":
-            self.chdata[2] = open(self.channeldata["ch2"], "rb").read()
-        if self.channeldata["ch3"] is not "":
-            self.chdata[3] = open(self.channeldata["ch3"], "rb").read()
+        #if channeldata["ch0"] is not "":
+        #    binfile = os.path.abspath(channeldata["ch0"])
+        #    self.chdata[0] = open(binfile, "rb").read()
+        #if channeldata["ch1"] is not "":
+        #    self.chdata[1] = open(channeldata["ch1"], "rb").read()
+        #if channeldata["ch2"] is not "":
+        #    self.chdata[2] = open(channeldata["ch2"], "rb").read()
+        #if channeldata["ch3"] is not "":
+        #    self.chdata[3] = open(channeldata["ch3"], "rb").read()
 
     def get_size(self):
         return len(self.waves)
@@ -180,10 +190,18 @@ class Sound(object):
 
 
 class Palette(object):
-    def __init__(self, palette):
-        self.palettes = palette["palette"]
-        self.bpp = palette["bpp"]
-        self.flags = (len(self.palettes) // (2 << self.bpp)) & 0x1F
+    def __init__(self, config):
+        if "palette" in config:
+            self.palettes = config["palette"]
+            self.data = None
+        elif "binfile" in config:
+            self.palettes = None
+            self.data = open(config["binfile"], "rb").read()
+        else:
+            self.data = b""
+
+        self.bpp = config["bpp"]
+        self.flags = (len(self.palettes) // (1 << self.bpp)) & 0x1F
         if self.bpp == 2:
             self.flags = self.flags | 0x80
 
@@ -191,8 +209,11 @@ class Palette(object):
         return len(self.palettes) * 2
 
     def write(self, f):
-        for p in self.palettes:
-            f.write(struct.pack("BB", p[0], (p[1] << 4) | p[2]))
+        if self.palettes:
+            for p in self.palettes:
+                f.write(struct.pack("BB", (p[1] << 4) | p[2], p[0]))
+        else:
+            f.write(self.data)
 
 
 class BootSplash(object):
@@ -212,7 +233,7 @@ class BootSplash(object):
     def write(self, filename):
         # This is the size of the start structure, used to calculate offset for
         # all other data
-        offset = 40
+        offset = 42
         with open(filename, "wb") as f:
             f.write(struct.pack("xxx"))
             f.write(struct.pack("B", self._consoleFlags))
@@ -262,6 +283,7 @@ class BootSplash(object):
             self._tilemap.write(f)
             self._vblankcode.write(f)
             self._sound.write(f)
+
 
 def main():
     parser = argparse.ArgumentParser()

@@ -78,8 +78,8 @@
     "asm": "samplesplash_vblank.s"
   },
   "sound": {
-    "channelwaves": "samplesplash_waves.bin",
-    "channeldata": {
+    "waves": "samplesplash_waves.bin",
+    "channelbin": {
       "ch0": "samplesplash_ch0.bin",
       "ch1": "samplesplash_ch1.bin",
       "ch2": "",
