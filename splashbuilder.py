@@ -314,6 +314,10 @@ class BootSplash(object):
             self._sound.write(f)
             self._sound.write_ch(f)
 
+            print("Output size: {t}".format(t=f.tell()))
+
+            if f.tell() > 0x3DB:
+                raise Exception("This boot splash is bigger than 987 bytes and will not work.")
 
 
 def main():
