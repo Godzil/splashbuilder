@@ -321,6 +321,8 @@ class BootSplash(object):
 
 
 def main():
+    print("WonderSwan SplashBuilder v")
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", required=True, type=str, help="Configuration file")
     parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")
@@ -333,8 +335,14 @@ def main():
         print("Error: config file '{f}' not found".format(f=args.config))
         return -1
 
-    bs = BootSplash(config)
-    bs.write(args.output)
+    try:
+        bs = BootSplash(config)
+        bs.write(args.output)
+    except FileNotFoundError as e:
+        print("Error: The file '{f}' cannot be found,"
+              " please check your config file".format(f=e.filename))
+    except Exception as e:
+        print("Error: {e}".format(e=e))
 
 
 if __name__ == "__main__":
