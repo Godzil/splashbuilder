@@ -227,9 +227,23 @@ class Palette(object):
             self.data = b""
 
         self.bpp = config["bpp"]
-        self.flags = (len(self.palettes) // (1 << self.bpp)) & 0x1F
+
+        if self.palettes:
+            self.flags = (len(self.palettes) / (1 << self.bpp))
+        else:
+            self.flags = ((len(self.data) / 2) / (1 << self.bpp))
+
+        if int(self.flags) != self.flags:
+            raise Exception("You palette length don't match with the chosen BPP")
+        if self.flags > 16:
+            raise Exception("You have too many palettes set (max 16)")
+
+        self.flags = int(self.flags) & 0x1F
+
         if self.bpp == 2:
             self.flags = self.flags | 0x80
+        else:
+            self.flags = self.flags & ~0x80
 
     def get_size(self):
         return len(self.palettes) * 2
