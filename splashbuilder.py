@@ -165,28 +165,54 @@ class Sound(object):
         channeldata = config["channelbin"]
         self.chdata = {}
 
-        self.chdata[0] = None
-        self.chdata[1] = None
-        self.chdata[2] = None
-        self.chdata[3] = None
+        self.channel_count = 0
 
-        #if channeldata["ch0"] is not "":
-        #    binfile = os.path.abspath(channeldata["ch0"])
-        #    self.chdata[0] = open(binfile, "rb").read()
-        #if channeldata["ch1"] is not "":
-        #    self.chdata[1] = open(channeldata["ch1"], "rb").read()
-        #if channeldata["ch2"] is not "":
-        #    self.chdata[2] = open(channeldata["ch2"], "rb").read()
-        #if channeldata["ch3"] is not "":
-        #    self.chdata[3] = open(channeldata["ch3"], "rb").read()
+        for i in range(4):
+            self.chdata[i] = None
+            tag = "ch{i}".format(i=i)
+            if channeldata[tag] is not "":
+                self.channel_count += 1
+                binfile = os.path.abspath(channeldata[tag])
+                self.chdata[i] = open(binfile, "rb").read()
+
+        if self.channel_count == 0:
+            raise Exception("You need at least one channel")
 
     def get_size(self):
         return len(self.waves)
-               #+ len(self.chdata[0]) + len(self.chdata[1]) + \
-               #len(self.chdata[2]) + len(self.chdata[3]) + 4 * 2
+
+    def get_ch_size(self):
+        current_len = 0
+        for i in range(4):
+            if self.chdata[i]:
+                current_len += len(self.chdata[i])
+
+        return current_len
+
+    def get_list_size(self):
+        current_len = 2  # We always have a tag to show the end of list
+        for i in range(4):
+            if self.chdata[i]:
+                current_len += 2
+
+        return current_len
 
     def write(self, f):
         f.write(self.waves)
+
+    def write_list(self, f, offset):
+        for i in range(4):
+            if self.chdata[i]:
+                f.write(struct.pack("<H", offset))
+                offset += len(self.chdata[i])
+
+        # End of list tag
+        f.write(struct.pack("BB", 0xFF, 0xFF))
+
+    def write_ch(self, f):
+        for i in range(4):
+            if self.chdata[i]:
+                f.write(self.chdata[i])
 
 
 class Palette(object):
@@ -233,7 +259,8 @@ class BootSplash(object):
     def write(self, filename):
         # This is the size of the start structure, used to calculate offset for
         # all other data
-        offset = 42
+        offset = 36 + self._sound.get_list_size()
+
         with open(filename, "wb") as f:
             f.write(struct.pack("xxx"))
             f.write(struct.pack("B", self._consoleFlags))
@@ -245,24 +272,16 @@ class BootSplash(object):
             f.write(struct.pack("B", self._palettes.flags)) # Splash flags
             f.write(struct.pack("B", self._tiles.count))
             f.write(struct.pack("<H", offset))  # Palette offset
-            print(offset, self._palettes.get_size())
-            paletteOffset = offset
             offset += self._palettes.get_size()
             f.write(struct.pack("<H", offset))  # Tileset offset
-            print(offset, self._tiles.get_size())
-            tilesetOffset = offset
             offset += self._tiles.get_size()
             f.write(struct.pack("<H", offset))  # Tilemap offset
-            print(offset, self._tilemap.get_size())
-            tilemapOffset = offset
             offset += self._tilemap.get_size()
             f.write(struct.pack("<H", self._tilemap.get_horz_offset()))
             f.write(struct.pack("<H", self._tilemap.get_vert_offset()))
             f.write(struct.pack("B", self._tilemap.width))
             f.write(struct.pack("B", self._tilemap.height))
             f.write(struct.pack("<HH", offset, 0x600))
-            print(offset, self._vblankcode.get_size())
-            codeOffset = offset
             offset += self._vblankcode.get_size()
             f.write(struct.pack("<BB", self._consoleName.horizontal.x,
                                        self._consoleName.horizontal.y))
@@ -270,12 +289,8 @@ class BootSplash(object):
                                        self._consoleName.vertical.y))
             f.write(struct.pack("xx"))
             f.write(struct.pack("<H", offset))
-            print(offset, self._sound.get_size())
-            soundWaveOffset = offset
             offset += self._sound.get_size()
-            f.write(struct.pack("<H", soundWaveOffset))
-            f.write(struct.pack("<H", soundWaveOffset))
-            f.write(struct.pack("<H", 0xFFFF))
+            self._sound.write_list(f, offset)
 
             self._palettes.write(f)
 
@@ -283,6 +298,8 @@ class BootSplash(object):
             self._tilemap.write(f)
             self._vblankcode.write(f)
             self._sound.write(f)
+            self._sound.write_ch(f)
+
 
 
 def main():
