@@ -12,7 +12,6 @@ def main():
         with open(args.output, "wb") as f_out:
             for prout in range(6):
                 data = f_in.read(8*8)
-                print(type(data))
                 p0 = 0
                 p1 = 0
 
