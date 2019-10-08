@@ -1,9 +1,11 @@
 # Convert GB CEL to WS Tile
 import struct
 import argparse
+from . import __version__
 
 
 def main():
+    print("cel2wst - {ver}".format(ver=__version__))
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, type=str, help="Input file")
     parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")

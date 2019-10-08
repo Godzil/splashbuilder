@@ -2,6 +2,8 @@
 import struct
 import argparse
 
+from . import __version__
+
 """
  GP Map is done:
  - width (4 bytes)
@@ -23,6 +25,7 @@ WS Map is
 
 
 def main():
+    print("map2wsm - {ver}".format(ver=__version__))
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, type=str, help="Input file")
     parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")

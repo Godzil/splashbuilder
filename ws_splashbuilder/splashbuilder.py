@@ -73,10 +73,12 @@ Pitch (16bit)
 if pitch bit 7 is set then the channel is stopped.
 
 """
+
 import os
 import json
 import struct
 import argparse
+from . import __version__
 
 
 class Coordinates(object):
@@ -321,7 +323,7 @@ class BootSplash(object):
 
 
 def main():
-    print("WonderSwan SplashBuilder v")
+    print("WonderSwan SplashBuilder - {ver}".format(ver=__version__))
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", required=True, type=str, help="Configuration file")
