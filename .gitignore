@@ -1,0 +1,14 @@
+# Compiled python file
+*.pyc
+# PyCharm folder
+.idea
+# Build folder
+build/
+dist/
+.eggs
+*.egg-info
+# Other things
+venv/
+*.tags
+*.swp
+*~
