@@ -210,3 +210,19 @@ The byte 5 is a bit of a weird byte here:
 _To WonderSwan flash cart manufacturer_: I highly recommend that your flash cart have the possibility to set the bit 7
 of byte 5 to 1, either permanently, or in any way that does not involve using a console, so people could recover from a
 badly installed bootsplash.
+
+
+#### Thanks
+
+This project would have never been possible without the indirect help of different people:
+* [furrtek](http://furrtek.free.fr/) ([@furrtek](https://twitter.com/furrtek)) who was the first to dumped the
+WonderSwan and WonderSwan Color boot rom, without it, all of this work would have never been possible
+* [byuu](https://byuu.net/) ([@byuu_san](https://twitter.com/byuu_san)) who gave a good motivation to furrtek to dump the bootrom :)
+* blim75 who [bringnup to my knowledge](https://www.yaronet.com/topics/191046-question-sequence-allumage-inconnue-sur-une-wonderswan-color-inuyasha)
+that there were Wonderswan's with a non standard bootsplash.
+From there I quickly guessed how thing are stored, but took me quite a long time to reverse the bootrom and get all the details and being able to make that tool.
+* Zerosquare for his help on the x86
+* [trap15](http://daifukkat.su) ([@trap0xf](https://twitter.com/trap0xf)) for his [up to date WonderSwan documentation](http://daifukkat.su/docs/wsman/)
+
+And I'm probably forgetting quite a lot of people.
+  
