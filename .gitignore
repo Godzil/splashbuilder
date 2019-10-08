@@ -12,3 +12,4 @@ venv/
 *.tags
 *.swp
 *~
+_version.py

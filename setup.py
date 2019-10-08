@@ -5,8 +5,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='splashbuilder',
-    version_format='{tag}',
-    setup_requires=['setuptools-git-version'],
+    use_scm_version={
+        'write_to': 'ws_splashbuilder/_version.py',
+    },
+    setup_requires=['setuptools_scm'],
+#    version_format='{tag}',
+#    setup_requires=['setuptools-git-version'],
     author="Manoel <godzil> Trapier",
     author_email="wssplashbuilder@godzil.net",
     description="A tool to build WonderSwan Color boot splash",
