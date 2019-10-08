@@ -28,7 +28,7 @@ pip install splashbuilder
 SplashBuilder is build using Python3 and some Linux distribution may force you to use `pip3` instead of `pip` to
 install using Python 3.
 
-You also need [https://www.nasm.us/](`nasm`) to be installed if you want to have your own code running in your bootsplash as a boot splash
+You also need [NASM](https://www.nasm.us/) to be installed if you want to have your own code running in your bootsplash as a boot splash
 include some code.
 
 #### How to make a bootsplash
