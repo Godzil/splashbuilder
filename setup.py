@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='splashbuilder',
-    version_format='{tag}.dev{commitcount}',
+    version_format='{tag}',
     setup_requires=['setuptools-git-version'],
     author="Manoel <godzil> Trapier",
     author_email="wssplashbuilder@godzil.net",
@@ -18,9 +18,9 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
-	"Development Status :: 2 - Pre-Alpha",
-	"Environment :: Console",
-	"License :: OSI Approved :: BSD License",
+        "Development Status :: 2 - Pre-Alpha",
+        "Environment :: Console",
+        "License :: OSI Approved :: BSD License",
     ],
     python_requires='>=3.6',
 )
