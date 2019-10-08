@@ -344,6 +344,3 @@ def main():
     except Exception as e:
         print("Error: {e}".format(e=e))
 
-
-if __name__ == "__main__":
-    main()

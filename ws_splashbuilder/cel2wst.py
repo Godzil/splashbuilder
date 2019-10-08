@@ -1,6 +1,7 @@
-# GB CEL to WS Tile
+# Convert GB CEL to WS Tile
 import struct
 import argparse
+
 
 def main():
     parser = argparse.ArgumentParser()

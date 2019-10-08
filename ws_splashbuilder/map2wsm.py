@@ -21,6 +21,7 @@ WS Map is
   b8-b0     tile 
 """
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, type=str, help="Input file")
