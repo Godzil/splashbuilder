@@ -226,3 +226,5 @@ From there I quickly guessed how thing are stored, but took me quite a long time
 
 And I'm probably forgetting quite a lot of people.
   
+
+If you want to talk, you are welcome to join my [Discord server](https://discord.gg/46B6NMk) and have a chat here :)
