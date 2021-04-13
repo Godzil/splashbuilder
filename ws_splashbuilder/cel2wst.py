@@ -8,19 +8,20 @@ def main():
     print("cel2wst - {ver}".format(ver=__version__))
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, type=str, help="Input file")
-    parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")
+    parser.add_argument("-o", "--output", type=str, help="Output file", default="output.wst")
+    parser.add_argument("-t", "--tilecount", type=int, help="Number of times", default=1)
     args = parser.parse_args()
 
     with open(args.input, "rb") as f_in:
         with open(args.output, "wb") as f_out:
-            for prout in range(6):
+            for currentTileId in range(args.tilecount):
                 data = f_in.read(8*8)
                 p0 = 0
                 p1 = 0
 
                 for y in range(8):
                     for x in range(8):
-                        d = struct.unpack("B", data[y*8+x])[0]
+                        d = struct.unpack_from("B", data, y*8+x)[0]
                         p0 = p0 << 1
                         p0 |= 1 if d & 0x01 else 0
                         p1 = p1 << 1

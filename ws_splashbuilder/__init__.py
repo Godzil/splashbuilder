@@ -9,3 +9,4 @@ except ImportError:
 from . import splashbuilder
 from . import cel2wst
 from . import map2wsm
+from . import pal2wsp

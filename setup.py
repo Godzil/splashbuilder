@@ -16,7 +16,7 @@ setuptools.setup(
     description="A tool to build WonderSwan Color boot splash",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=['bin/splashbuilder', 'bin/cel2wst', 'bin/map2wsm'],
+    scripts=['bin/splashbuilder', 'bin/cel2wst', 'bin/map2wsm', 'bin/pal2wsp'],
     url="https://github.com/godzil/splashbuilder",
     packages=["ws_splashbuilder"],
     classifiers=[

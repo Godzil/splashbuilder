@@ -28,7 +28,7 @@ def main():
     print("map2wsm - {ver}".format(ver=__version__))
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True, type=str, help="Input file")
-    parser.add_argument("-o", "--output", type=str, help="Output file", default="output.bin")
+    parser.add_argument("-o", "--output", type=str, help="Output file", default="output.wsm")
     args = parser.parse_args()
 
     with open(args.input, "rb") as f_in:

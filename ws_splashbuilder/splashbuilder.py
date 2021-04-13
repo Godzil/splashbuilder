@@ -96,7 +96,7 @@ class Sound(object):
         for i in range(4):
             self.chdata[i] = None
             tag = "ch{i}".format(i=i)
-            if channeldata[tag] is not "":
+            if channeldata[tag] != "":
                 self.channel_count += 1
                 binfile = os.path.abspath(channeldata[tag])
                 self.chdata[i] = open(binfile, "rb").read()
@@ -177,7 +177,9 @@ class Palette(object):
     def write(self, f):
         if self.palettes:
             for p in self.palettes:
-                f.write(struct.pack("BB", (p[1] << 4) | p[2], p[0]))
+                v1 = (p[1] << 4) | p[2]
+                v2 = p[0]
+                f.write(struct.pack("BB", v1, v2))
         else:
             f.write(self.data)
 
@@ -196,12 +198,26 @@ class BootSplash(object):
         # Set bootsplash, and volume to 2
         self._consoleFlags = 0x82
 
-    def write(self, filename):
+    def write(self, filename, write_eeprom=False):
         # This is the size of the start structure, used to calculate offset for
         # all other data
+
         offset = 36 + self._sound.get_list_size()
 
         with open(filename, "wb") as f:
+            if write_eeprom:
+                # First w have 96 blank bytes
+                f.write(b"\x00" * 96)
+
+                # Then "SWANCRYSTAL" (not in ascii)
+                f.write(b"\x1D\x21\x0B\x18\x0D\x1C\x13\x1D\x1E\x0B\x16")
+                # followed by padding as we are not filloing the whole name area
+                f.write(b"\x00" * 11)
+                # then bytes we don't care to set aas the bootrom will change them anyway all by itself
+                f.write(b"\x00" * 10)
+
+            minPos = f.tell()
+
             f.write(struct.pack("xxx"))
             f.write(struct.pack("B", self._consoleFlags))
             f.write(struct.pack("B", self._consoleName.color))
@@ -240,9 +256,9 @@ class BootSplash(object):
             self._sound.write(f)
             self._sound.write_ch(f)
 
-            print("Output size: {t}".format(t=f.tell()))
+            print("Output size: {t}".format(t=f.tell() - minPos))
 
-            if f.tell() > 0x3DB:
+            if (f.tell() - minPos) > 0x3DB:
                 raise Exception("This boot splash is bigger than 987 bytes and will not work.")
 
 
