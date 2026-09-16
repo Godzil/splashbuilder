@@ -10,3 +10,4 @@ from . import splashbuilder
 from . import cel2wst
 from . import map2wsm
 from . import pal2wsp
+from . import map2rle
