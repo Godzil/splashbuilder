@@ -192,15 +192,17 @@ The bit that need to be set to 1 is part of the cartridge metadata.
 In the last 16 bytes you will find the reset vector and some information about the game:
 ```
 00h - 04h: JMP FAR instruction for the reset vector
-05h      : ???
-06h      : Publisher ID
-07h - 08h: Game IO
-09h      : Game revision
+05h      : "Fixed Data"
+06h - 07h: Maker Code
+08h      : Title Code
+09h      : Version
 0Ah      : ROM size
-0Bh      : Save type / size
-0Ch - 0Dh: Cart flags
-0Eh - 0Fh: ROM CRC
+0Bh      : XRAM / XEROM size
+0Ch      : Boot Loader
+0Dh      : Sub System LSI
+0Eh - 0Fh: Checksum
 ```
+(the name of fields is from official Bandai tools)
 
 The byte 5 is a bit of a weird byte here:
 - `bit 7`: Set = ignore custom bootsplash
