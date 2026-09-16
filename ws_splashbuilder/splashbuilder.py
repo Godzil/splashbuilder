@@ -63,13 +63,13 @@ class Tilemap(object):
 
 class VBlankCode(object):
     def __init__(self, config):
+        self._base_offset = 0
+        self._config = config
         if "asm" in config:
-            asmfile = os.path.abspath(config["asm"])
-            binfile = os.path.splitext(asmfile)[0] + ".bin"
-            runcmd = "nasm -f bin -o {output} {input}".format(input=asmfile,
-                                                              output=binfile)
-            os.system(runcmd)
-            self.data = open(binfile, "rb").read()
+            self._asmfile = os.path.abspath(config["asm"])
+            self._binfile = os.path.splitext(self._asmfile)[0] + ".bin"
+            self.data = b""
+            self.build()
         elif "binfile" in config:
             binfile = os.path.abspath(config["binfile"])
             self.data = open(binfile, "rb").read()
@@ -78,6 +78,17 @@ class VBlankCode(object):
 
     def get_size(self):
         return len(self.data)
+
+    def set_offset(self, offset):
+        self._base_offset = offset
+
+    def build(self):
+        if "asm" in self._config:
+            runcmd = "nasm -f bin -o {output} {input} -DBASE_OFFSET={offset}".format(input=self._asmfile,
+                                                                                     output=self._binfile,
+                                                                                     offset=self._base_offset)
+            os.system(runcmd)
+            self.data = open(self._binfile, "rb").read()
 
     def write(self, f):
         f.write(self.data)
@@ -177,8 +188,8 @@ class Palette(object):
     def write(self, f):
         if self.palettes:
             for p in self.palettes:
-                v1 = (p[1] << 4) | p[2]
-                v2 = p[0]
+                v1 = (p[1] << 4) | p[0]
+                v2 = p[2]
                 f.write(struct.pack("BB", v1, v2))
         else:
             f.write(self.data)
@@ -238,6 +249,7 @@ class BootSplash(object):
             f.write(struct.pack("B", self._tilemap.width))
             f.write(struct.pack("B", self._tilemap.height))
             f.write(struct.pack("<HH", offset, 0x600))
+            self._vblankcode.set_offset(offset)
             offset += self._vblankcode.get_size()
             f.write(struct.pack("<BB", self._consoleName.horizontal.x,
                                        self._consoleName.horizontal.y))
@@ -252,6 +264,9 @@ class BootSplash(object):
 
             self._tiles.write(f)
             self._tilemap.write(f)
+
+            # Rebuild with the right offset
+            self._vblankcode.build()
             self._vblankcode.write(f)
             self._sound.write(f)
             self._sound.write_ch(f)
@@ -279,7 +294,7 @@ def main():
 
     try:
         bs = BootSplash(config)
-        bs.write(args.output)
+        bs.write(args.output, True)
     except FileNotFoundError as e:
         print("Error: The file '{f}' cannot be found,"
               " please check your config file".format(f=e.filename))
