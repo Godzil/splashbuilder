@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "splashbuilder"
+dynamic = ["version"]
+
+requires-python = ">=3.10"
+authors = [
+  { name = "Manoel <godzil> Trapier", email = "wssplashbuilder@godzil.net" },
+]
+maintainers = [
+  { name = "Manoel <godzil> Trapier", email = "wssplashbuilder@godzil.net" },
+]
+description = "Tool to build splash binary for the wondersawn"
+readme = "README.md"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+keywords = ["wonderswan", "splash", "boot"]
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+        "Development Status :: 2 - Pre-Alpha",
+        "Environment :: Console",
+        "License :: OSI Approved :: BSD License",
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "ws_splashbuilder/_version.py"
+
+[project.urls]
+Repository = "https://github.com/Godzil/splashbuilder"
+"Bug Tracker" = "https://github.com/Godzil/splashbuilder/issues"
+
+[project.scripts]
+cel2wst = "ws_splashbuilder:cel2wst"
+map2rle = "ws_splashbuilder:map2rle"
+map2wsm = "ws_splashbuilder:map2wsm"
+pal2wsp = "ws_splashbuilder:pal2wsp"
+splashbuilder = "ws_splashbuilder:__main__"
